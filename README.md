@@ -25,7 +25,7 @@ Ranks every backpack in Escape from Tarkov by storage efficiency — slots per r
 
 ## Usage
 
-Open the [live demo](https://lichtspitze.github.io/tarkov-backpack-tool). Sort and filter the table to find the best backpack for your budget. Switch the price basis between 24h average and last low price depending on how you like to shop.
+Open the [live demo]([https://lichtspitze.github.io/tarkov-backpack-tool)](https://lichtspitze.github.io/tarkov-backpack-tool). Sort and filter the table to find the best backpack for your budget. Switch the price basis between 24h average and last low price depending on how you like to shop.
 
 To run locally, clone the repo and open `index.html` in a browser — no server needed.
 
