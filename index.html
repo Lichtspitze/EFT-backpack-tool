@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tarkov Backpack Value</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f5f5f3;
+      --color-background-tertiary: #eeede8;
+      --color-text-primary: #1a1a18;
+      --color-text-secondary: #6b6b68;
+      --color-border-tertiary: rgba(0,0,0,0.12);
+      --color-border-secondary: rgba(0,0,0,0.22);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --border-radius-md: 8px;
+      --border-radius-lg: 12px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-background-primary: #1e1e1c;
+        --color-background-secondary: #2a2a28;
+        --color-background-tertiary: #323230;
+        --color-text-primary: #f0efea;
+        --color-text-secondary: #9a9994;
+        --color-border-tertiary: rgba(255,255,255,0.1);
+        --color-border-secondary: rgba(255,255,255,0.18);
+      }
+    }
+    body { font-family: var(--font-sans); color: var(--color-text-primary); background: var(--color-background-tertiary); font-size: 13px; min-height: 100vh; }
+    .page { max-width: 1300px; margin: 0 auto; padding: 0 24px 48px; }
+    .header { padding: 1.5rem 0 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.25rem; display: flex; align-items: baseline; gap: 12px; }
+    .header h1 { font-size: 22px; font-weight: 500; }
+    .header p { font-size: 13px; color: var(--color-text-secondary); }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+    .controls select, .controls input { height: 32px; font-size: 13px; padding: 0 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); }
+    .controls input { flex: 1; min-width: 160px; }
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 1.25rem; }
+    .sc { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+    .sc .lbl { font-size: 11px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+    .sc .val { font-size: 19px; font-weight: 500; }
+    .chart-section { background: var(--color-background-primary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+    .chart-section h2 { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .chart-wrap { position: relative; width: 100%; }
+    .table-wrap { overflow-x: auto; border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--color-background-primary); }
+    thead th { text-align: left; padding: 8px 10px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-secondary); border-bottom: 0.5px solid var(--color-border-tertiary); white-space: nowrap; cursor: pointer; user-select: none; background: var(--color-background-secondary); }
+    thead th:hover { color: var(--color-text-primary); }
+    tbody tr { border-bottom: 0.5px solid var(--color-border-tertiary); }
+    tbody tr:hover { background: var(--color-background-secondary); }
+    tbody tr.top-row { background: #E1F5EE; }
+    tbody tr.top-row:hover { background: #9FE1CB; }
+    tbody td { padding: 8px 10px; vertical-align: middle; }
+    .rank { font-weight: 500; color: var(--color-text-secondary); font-size: 12px; }
+    .rank.gold { color: #BA7517; }
+    .item-name { font-weight: 500; }
+    .item-sub { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+    .muted { color: var(--color-text-secondary); }
+    .badge { display: inline-block; font-size: 11px; padding: 2px 7px; border-radius: var(--border-radius-md); font-weight: 500; }
+    .b-best { background: #E1F5EE; color: #0F6E56; }
+    .b-good { background: #EAF3DE; color: #3B6D11; }
+    .b-mid  { background: #FAEEDA; color: #854F0B; }
+    .b-poor { background: #FAECE7; color: #993C1D; }
+    .b-none { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+    .efficiency-bar-wrap { display: flex; align-items: center; gap: 6px; }
+    .efficiency-bar { height: 6px; border-radius: 3px; flex-shrink: 0; }
+    .grid-detail { display: flex; gap: 3px; flex-wrap: wrap; margin-top: 2px; }
+    .grid-pill { font-size: 10px; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: 4px; padding: 1px 5px; color: var(--color-text-secondary); white-space: nowrap; }
+    .loading { text-align: center; padding: 3rem; color: var(--color-text-secondary); background: var(--color-background-primary); border-radius: var(--border-radius-lg); }
+    .error { color: #D85A30; padding: 1rem; text-align: center; background: #FAECE7; border-radius: var(--border-radius-md); }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 1rem; }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .sort-hint { font-size: 11px; color: var(--color-text-secondary); }
+    .no-results { text-align: center; padding: 2rem; color: var(--color-text-secondary); background: var(--color-background-primary); border-radius: var(--border-radius-lg); }
+  </style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>Tarkov backpack value</h1>
+    <p>Storage slots per ruble — live flea market data</p>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="Search backpack name..." oninput="render()" />
+    <select id="sort-by" onchange="render()">
+      <option value="eff_desc">Sort: slots per ₽ (best first)</option>
+      <option value="slots_desc">Sort: most slots</option>
+      <option value="price_asc">Sort: cheapest first</option>
+      <option value="price_desc">Sort: most expensive</option>
+      <option value="name_asc">Sort: name A–Z</option>
+    </select>
+    <select id="price-basis" onchange="render()">
+      <option value="avg">24h avg price</option>
+      <option value="low">Last low price</option>
+    </select>
+  </div>
+
+  <div class="stats-row">
+    <div class="sc"><div class="lbl">Backpacks</div><div class="val" id="s-total">—</div></div>
+    <div class="sc"><div class="lbl">Best slots/10k₽</div><div class="val" id="s-best-eff" style="color:#1D9E75">—</div></div>
+    <div class="sc"><div class="lbl">Most slots</div><div class="val" id="s-most-slots">—</div></div>
+    <div class="sc"><div class="lbl">Cheapest</div><div class="val" id="s-cheapest">—</div></div>
+    <div class="sc"><div class="lbl">Most expensive</div><div class="val" id="s-priciest">—</div></div>
+  </div>
+
+  <div class="chart-section">
+    <h2>Slots per 10,000 ₽ — top 20</h2>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>Best value (top 15%)</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#639922"></span>Good value</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#BA7517"></span>Average</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#D85A30"></span>Poor value</span>
+    </div>
+    <div class="chart-wrap" id="chart-wrap" style="height:320px">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <div id="table-area"><div class="loading">Fetching data from tarkov.dev...</div></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+let packs = [];
+let barterMap = {};
+let chartInst = null;
+
+function fmt(n) {
+  if (!n) return '—';
+  if (n >= 1000000) return (n/1000000).toFixed(2)+'M';
+  if (n >= 1000) return Math.round(n/1000)+'k';
+  return Math.round(n).toLocaleString();
+}
+
+function getPrice(p) {
+  const basis = document.getElementById('price-basis').value;
+  return basis === 'low' ? (p.lastLowPrice||p.avg24hPrice||0) : (p.avg24hPrice||p.lastLowPrice||0);
+}
+
+async function fetchPacks() {
+  const query = `{
+    items(types: [backpack]) {
+      id name shortName
+      avg24hPrice lastLowPrice
+      width height
+      properties {
+        ... on ItemPropertiesBackpack {
+          grids { width height }
+          capacity
+        }
+      }
+    }
+    barters {
+      id trader { name } level
+      requiredItems { item { id name shortName avg24hPrice lastLowPrice } count }
+      rewardItems { item { id } count }
+    }
+  }`;
+  const r = await fetch('https://api.tarkov.dev/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ query })
+  });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  if (d.errors?.length && !d.data) throw new Error(d.errors[0].message);
+  return { items: d.data.items || [], barters: d.data.barters || [] };
+}
+
+function processRaw({ items, barters }) {
+  // build barter map: itemId -> cheapest barter that rewards it
+  barterMap = {};
+  for (const b of barters) {
+    for (const oi of (b.rewardItems||[])) {
+      if (!oi?.item?.id) continue;
+      // calc cost of inputs at flea
+      let inputCost = 0;
+      const inputDesc = [];
+      for (const ri of (b.requiredItems||[])) {
+        if (!ri?.item) continue;
+        const p = ri.item.avg24hPrice || ri.item.lastLowPrice || 0;
+        if (!p) continue;
+        inputCost += p * (ri.count||1);
+        inputDesc.push((ri.count||1)+'x '+(ri.item.shortName||ri.item.name));
+      }
+      if (!inputCost) continue;
+      const costPerOne = inputCost / (oi.count||1);
+      if (!barterMap[oi.item.id]) barterMap[oi.item.id] = [];
+      barterMap[oi.item.id].push({
+        trader: b.trader?.name || 'Trader',
+        level: b.level || 1,
+        totalInputCost: Math.round(inputCost),
+        gives: oi.count||1,
+        costPerOne: Math.round(costPerOne),
+        desc: inputDesc.join(', ')
+      });
+    }
+  }
+  // keep cheapest barter per item
+  for (const id of Object.keys(barterMap)) {
+    barterMap[id].sort((a,b) => a.costPerOne - b.costPerOne);
+  }
+
+  return items.map(item => {
+    const grids = item.properties?.grids || [];
+    const totalSlots = item.properties?.capacity ||
+      grids.reduce((s, g) => s + (g.width||0)*(g.height||0), 0) || 0;
+    const ownSlots = (item.width||1) * (item.height||1);
+    return { ...item, grids, totalSlots, ownSlots };
+  }).filter(p => p.totalSlots > 0);
+}
+
+function getSorted() {
+  const sort = document.getElementById('sort-by').value;
+  const search = document.getElementById('search').value.toLowerCase();
+
+  let out = packs.map(p => {
+    const fleaPrice = getPrice(p);
+    const barters = barterMap[p.id] || [];
+    const bestBarter = barters[0] || null;
+    const barterPrice = bestBarter ? bestBarter.costPerOne : 0;
+    // best acquisition price = cheapest of flea or barter
+    const bestPrice = fleaPrice > 0 && barterPrice > 0
+      ? Math.min(fleaPrice, barterPrice)
+      : (fleaPrice || barterPrice);
+    const price = fleaPrice; // flea stays as display price
+    const eff = bestPrice > 0 ? p.totalSlots / bestPrice * 10000 : 0;
+    return { ...p, price, fleaPrice, barterPrice, bestBarter, bestPrice, eff };
+  });
+
+  if (search) out = out.filter(p =>
+    p.name.toLowerCase().includes(search) ||
+    (p.shortName||'').toLowerCase().includes(search)
+  );
+
+  if (sort === 'eff_desc')        out.sort((a,b) => b.eff - a.eff);
+  else if (sort === 'slots_desc') out.sort((a,b) => b.totalSlots - a.totalSlots);
+  else if (sort === 'price_asc')  out.sort((a,b) => (a.price||Infinity) - (b.price||Infinity));
+  else if (sort === 'price_desc') out.sort((a,b) => b.price - a.price);
+  else if (sort === 'name_asc')   out.sort((a,b) => a.name.localeCompare(b.name));
+
+  return out;
+}
+
+function updateStats(sorted) {
+  const withPrice = sorted.filter(p => p.price > 0);
+  document.getElementById('s-total').textContent = sorted.length;
+  if (!withPrice.length) return;
+  const bestEff = withPrice.reduce((b,p) => p.eff > b.eff ? p : b, withPrice[0]);
+  document.getElementById('s-best-eff').textContent = bestEff.eff.toFixed(2);
+  const mostSlots = sorted.reduce((b,p) => p.totalSlots > b.totalSlots ? p : b, sorted[0]);
+  document.getElementById('s-most-slots').textContent = mostSlots.totalSlots + ' slots';
+  const cheapest = withPrice.reduce((b,p) => p.price < b.price ? p : b, withPrice[0]);
+  document.getElementById('s-cheapest').textContent = fmt(cheapest.price);
+  const priciest = withPrice.reduce((b,p) => p.price > b.price ? p : b, withPrice[0]);
+  document.getElementById('s-priciest').textContent = fmt(priciest.price);
+}
+
+function renderChart(sorted) {
+  const top = sorted.filter(p => p.price > 0).slice(0, 20);
+  if (!top.length) return;
+  const maxEff = Math.max(...top.map(p => p.eff));
+  const labels = top.map(p => p.shortName || p.name.split(' ').slice(-1)[0]);
+  const effs = top.map(p => parseFloat(p.eff.toFixed(2)));
+  const colors = effs.map(e => {
+    const r = e / maxEff;
+    return r >= 0.85 ? '#1D9E75' : r >= 0.6 ? '#639922' : r >= 0.35 ? '#BA7517' : '#D85A30';
+  });
+
+  const h = Math.max(280, top.length * 26 + 60);
+  document.getElementById('chart-wrap').style.height = h + 'px';
+
+  if (chartInst) { chartInst.destroy(); chartInst = null; }
+  chartInst = new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Slots per 10k ₽',
+        data: effs,
+        backgroundColor: colors,
+        borderRadius: 3,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const p = top[ctx.dataIndex];
+              const lines = [
+                ` ${ctx.parsed.x.toFixed(2)} slots per 10k ₽`,
+                ` ${p.totalSlots} total slots`,
+              ];
+              if (p.fleaPrice) lines.push(` flea: ${fmt(p.fleaPrice)}`);
+              if (p.bestBarter) lines.push(` barter (${p.bestBarter.trader} LL${p.bestBarter.level}): ${fmt(p.barterPrice)}`);
+              return lines;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(128,128,128,0.1)' },
+          ticks: { color: '#888780', font: { size: 11 } },
+          title: { display: true, text: 'slots per 10,000 ₽', color: '#888780', font: { size: 11 } }
+        },
+        y: {
+          ticks: { color: '#6b6b68', font: { size: 11 }, autoSkip: false },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function effBadge(eff, maxEff) {
+  if (!eff) return `<span class="badge b-none">no price</span>`;
+  const r = eff / maxEff;
+  const cls = r >= 0.85 ? 'b-best' : r >= 0.6 ? 'b-good' : r >= 0.35 ? 'b-mid' : 'b-poor';
+  return `<span class="badge ${cls}">${eff.toFixed(2)}</span>`;
+}
+
+function render() {
+  const sorted = getSorted();
+  updateStats(sorted);
+  renderChart(sorted);
+
+  if (!sorted.length) {
+    document.getElementById('table-area').innerHTML = '<div class="no-results">No backpacks found.</div>';
+    return;
+  }
+
+  const withPrice = sorted.filter(p => p.price > 0);
+  const maxEff = withPrice.length ? Math.max(...withPrice.map(p => p.eff)) : 1;
+  const maxSlots = sorted.length ? Math.max(...sorted.map(p => p.totalSlots)) : 1;
+  let effRank = 0;
+
+  let html = `<div class="table-wrap"><table><thead><tr>
+    <th onclick="setSort('eff_desc')">#</th>
+    <th onclick="setSort('name_asc')">Name</th>
+    <th onclick="setSort('slots_desc')">Total slots</th>
+    <th>Own footprint</th>
+    <th>Grid layout</th>
+    <th onclick="setSort('price_asc')">Acquire price</th>
+    <th onclick="setSort('eff_desc')">Slots / 10k ₽ ↕</th>
+    <th>Capacity bar</th>
+  </tr></thead><tbody>`;
+
+  sorted.forEach((p, i) => {
+    if (p.price > 0) effRank++;
+    const isTop = effRank === 1 && p.price > 0;
+    const barW = Math.round((p.totalSlots / maxSlots) * 120);
+    const barColor = p.price > 0
+      ? (p.eff/maxEff >= 0.85 ? '#1D9E75' : p.eff/maxEff >= 0.6 ? '#639922' : p.eff/maxEff >= 0.35 ? '#BA7517' : '#D85A30')
+      : '#B4B2A9';
+
+    html += `<tr class="${isTop ? 'top-row' : ''}">
+      <td class="rank ${effRank <= 3 && p.price > 0 ? 'gold' : ''}">${p.price > 0 ? effRank : '—'}</td>
+      <td>
+        <div class="item-name">${p.name}</div>
+        ${p.shortName ? `<div class="item-sub">${p.shortName}</div>` : ''}
+      </td>
+      <td style="font-weight:500">${p.totalSlots}</td>
+      <td class="muted">${p.width||'?'}×${p.height||'?'} (${p.ownSlots} sl)</td>
+      <td>
+        <div class="grid-detail">
+          ${p.grids.map(g=>`<span class="grid-pill">${g.width}×${g.height}</span>`).join('')}
+        </div>
+      </td>
+      <td>
+        <div style="font-size:13px;color:var(--color-text-secondary)">${p.fleaPrice > 0 ? fmt(p.fleaPrice) : '<span style="color:var(--color-text-secondary)">no flea</span>'}</div>
+        ${p.bestBarter ? `<div style="margin-top:3px;display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <span style="font-size:10px;background:#EEEDFE;color:#534AB7;padding:1px 6px;border-radius:4px;font-weight:500">${p.bestBarter.trader} LL${p.bestBarter.level}</span>
+          <span style="font-size:11px;${p.barterPrice < p.fleaPrice || !p.fleaPrice ? 'color:#1D9E75;font-weight:500' : 'color:var(--color-text-secondary)'}">${fmt(p.barterPrice)}</span>
+          ${p.fleaPrice > 0 && p.barterPrice < p.fleaPrice ? `<span style="font-size:10px;color:#1D9E75">(-${fmt(p.fleaPrice-p.barterPrice)})</span>` : ''}
+          ${p.fleaPrice > 0 && p.barterPrice > p.fleaPrice ? `<span style="font-size:10px;color:var(--color-text-secondary)">(+${fmt(p.barterPrice-p.fleaPrice)})</span>` : ''}
+        </div>` : ''}
+        ${p.bestBarter ? `<div style="font-size:10px;color:var(--color-text-secondary);margin-top:2px;max-width:160px;line-height:1.3">${p.bestBarter.desc}</div>` : ''}
+      </td>
+      <td>${p.price > 0 ? effBadge(p.eff, maxEff) : '<span class="badge b-none">no data</span>'}</td>
+      <td>
+        <div class="efficiency-bar-wrap">
+          <div class="efficiency-bar" style="width:${barW}px;background:${barColor}"></div>
+          <span class="muted" style="font-size:11px">${p.totalSlots}</span>
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  document.getElementById('table-area').innerHTML = html;
+}
+
+function setSort(v) {
+  document.getElementById('sort-by').value = v;
+  render();
+}
+
+(async () => {
+  try {
+    const raw = await fetchPacks();
+    packs = processRaw(raw);
+    render();
+  } catch(e) {
+    document.getElementById('table-area').innerHTML = `<div class="error">Failed to load: ${e.message}</div>`;
+    document.getElementById('chart-wrap').innerHTML = '';
+  }
+})();
+</script>
+</body>
+</html>
