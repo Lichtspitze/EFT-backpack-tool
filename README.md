@@ -2,7 +2,7 @@
 
 Ranks every backpack in Escape from Tarkov by storage efficiency — slots per ruble — using live flea market data. Helps you figure out which backpack gives you the most inventory space for your money.
 
-**[Live Demo →](https://lichtspitze.github.io/tarkov-backpack-tool)**
+**[Live Demo →](https://lichtspitze.github.io/EFT-backpack-tool/)**
 
 
 ---
